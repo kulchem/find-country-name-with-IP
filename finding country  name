@@ -1,0 +1,52 @@
+public class Hede {
+    
+    static ArrayList<String> tekilLinkler = new ArrayList<>();
+    
+    static String getIP(String host)
+    {
+        String data = "";
+        try
+        {
+            Process p  = Runtime.getRuntime().exec("ping -n 1 -i 1 "+host);
+            Scanner oku = new Scanner(p.getInputStream(), "UTF-8");
+            oku.nextLine();
+            oku.nextLine();
+            oku.nextLine();
+            oku.nextLine();
+            data = oku.nextLine();
+        } catch (Exception e) { e.printStackTrace(); }
+        return data.replace("Ping statistics for ", "").replace(":", "");
+    }
+    
+    public static void main(String[] args) throws Exception
+    {
+        String adr = "http://www.hurriyet.com.tr/anasayfa/";
+        
+        Document doc = Jsoup.connect(adr).userAgent("Mozilla").timeout(30000).get();
+        Elements linkler = doc.select("a");
+        
+        for (Element link : linkler)
+        {
+            try
+            {
+                String url = link.absUrl("href");
+               // System.out.println(url);
+                URI u = URI.create(url);
+                // http://www.google.com/main/search?q=emir
+                
+                String host = u.getHost();
+                
+                if (!tekilLinkler.contains(host))
+                    tekilLinkler.add(host);
+            } catch (Exception e) { }
+        }
+        tekilLinkler.remove(null);
+        tekilLinkler.remove("null");
+        
+        for (String tl : tekilLinkler)
+        {
+            
+            System.out.println(tl+"  -->  "+getIP(tl));
+        }
+    }
+}
